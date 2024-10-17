@@ -30,7 +30,8 @@ find_package(ORB_SLAM3 REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
-find_package(image_transport REQUIRED)  # Eklenmiştir
+find_package(image_transport REQUIRED)  
+find_package(OpenCV REQUIRED)
 
 # Include directories
 include_directories(
@@ -60,7 +61,7 @@ ament_target_dependencies(mono
   OpenCV
   visualization_msgs  
   std_srvs  
-  image_transport  # Buraya eklenmiştir
+  image_transport  
 )
 
 # Install the target
