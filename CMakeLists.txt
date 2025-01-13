@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(orbslam3_pose)
 
-# You should set the PYTHONPATH to your own python site-packages path
+# Set the PYTHONPATH to your Python site-packages path
 set(ENV{PYTHONPATH} "/opt/ros/humble/lib/python3.10/site-packages")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
@@ -38,18 +38,19 @@ include_directories(
   include
   ${ORB_SLAM3_ROOT_DIR}/include
   ${ORB_SLAM3_ROOT_DIR}/include/CameraModels
-  ${ORB_SLAM3_ROOT_DIR}/include/CameraModels/GeometricCamera.h
   ${ORB_SLAM3_ROOT_DIR}/Thirdparty/Sophus
   ${Pangolin_INCLUDE_DIRS}
-)
-target_link_libraries(${PROJECT_NAME}
-${Pangolin_LIBRARIES}
 )
 
 # Mono executable
 add_executable(mono
   src/monocular/mono.cpp
   src/monocular/monocular-slam-node.cpp
+)
+
+target_link_libraries(mono
+  ${Pangolin_LIBRARIES}
+  ${ORB_SLAM3_LIBRARIES} 
 )
 
 ament_target_dependencies(mono 
