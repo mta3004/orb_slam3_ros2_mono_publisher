@@ -40,6 +40,10 @@ include_directories(
   ${ORB_SLAM3_ROOT_DIR}/include/CameraModels
   ${ORB_SLAM3_ROOT_DIR}/include/CameraModels/GeometricCamera.h
   ${ORB_SLAM3_ROOT_DIR}/Thirdparty/Sophus
+  ${Pangolin_INCLUDE_DIRS}
+)
+target_link_libraries(${PROJECT_NAME}
+${Pangolin_LIBRARIES}
 )
 
 # Mono executable
