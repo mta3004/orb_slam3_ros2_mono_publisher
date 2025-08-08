@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>orbslam3_pose</name>
   <version>1.0.0</version>
   <description>ROS2 wrapper for ORB_SLAM3 library</description>
@@ -20,6 +20,11 @@
   <depend>cv_bridge</depend>
   <depend>message_filters</depend>
   <depend>Pangolin</depend>
+  <depend>visualization_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>image_transport</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

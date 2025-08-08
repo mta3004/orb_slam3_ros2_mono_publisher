@@ -32,10 +32,12 @@ find_package(visualization_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(image_transport REQUIRED)  
 find_package(OpenCV REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 # Include directories
 include_directories(
   include
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/monocular_inertial
   ${ORB_SLAM3_ROOT_DIR}/include
   ${ORB_SLAM3_ROOT_DIR}/include/CameraModels
   ${ORB_SLAM3_ROOT_DIR}/Thirdparty/Sophus
@@ -71,5 +73,34 @@ ament_target_dependencies(mono
 
 # Install the target
 install(TARGETS mono DESTINATION lib/${PROJECT_NAME})
+
+# Mono-inertial executable
+add_executable(mono_inertial
+  src/monocular_inertial/mono_inertial.cpp
+  src/monocular_inertial/monocular-inertial-slam-node.cpp
+)
+
+target_link_libraries(mono_inertial
+  ${Pangolin_LIBRARIES}
+  ${ORB_SLAM3_LIBRARIES}
+)
+
+ament_target_dependencies(mono_inertial
+  rclcpp
+  sensor_msgs
+  tf2_ros
+  tf2_geometry_msgs
+  tf2
+  nav_msgs
+  cv_bridge
+  ORB_SLAM3
+  Pangolin
+  OpenCV
+  visualization_msgs
+  std_srvs
+  image_transport
+)
+
+install(TARGETS mono_inertial DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
