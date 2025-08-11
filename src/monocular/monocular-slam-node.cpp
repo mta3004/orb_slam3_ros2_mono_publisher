@@ -121,9 +121,9 @@ void MonocularSlamNode::GrabImage(const ImageMsg::SharedPtr msg)
         publish_kf_markers(m_SLAM->GetAllKeyframePoses(), msg_time);
         
     }
-    catch (cv_bridge::Exception& e)
+    catch (const std::exception& e)
     {
-        RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
+        RCLCPP_ERROR(this->get_logger(), "image processing exception: %s", e.what());
     }
 }
 

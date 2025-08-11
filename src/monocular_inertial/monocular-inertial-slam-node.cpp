@@ -53,7 +53,7 @@ void MonocularInertialSlamNode::handle_imu(const ImuMsg::SharedPtr msg)
     Eigen::Vector3f gyr(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
 
     std::lock_guard<std::mutex> lock(imu_mutex_);
-    ORB_SLAM3::IMU::Point p(acc, gyr, t);
+    ORB_SLAM3::IMU::Point p(t, acc, gyr);
     imu_buffer_.push_back(p);
 
     const double window_sec = 5.0; // keep up to 5 seconds IMU
@@ -141,9 +141,9 @@ void MonocularInertialSlamNode::handle_image(const ImageMsg::SharedPtr msg)
         publish_tracking_img(slam_->GetCurrentFrame(), msg->header.stamp);
         publish_kf_markers(slam_->GetAllKeyframePoses(), msg_time);
     }
-    catch (cv_bridge::Exception &e)
+    catch (const std::exception &e)
     {
-        RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
+        RCLCPP_ERROR(this->get_logger(), "image/imu processing exception: %s", e.what());
     }
 }
 
@@ -283,13 +283,13 @@ sensor_msgs::msg::PointCloud2 MonocularInertialSlamNode::mappoint_to_pointcloud(
     return cloud;
 }
 
-void MonocularInertialSlamNode::publish_tracked_points(const std::vector<ORB_SLAM3::MapPoint *> tracked_points, const rclcpp::Time &msg_time)
+void MonocularInertialSlamNode::publish_tracked_points(const std::vector<ORB_SLAM3::MapPoint*>& tracked_points, const rclcpp::Time& msg_time)
 {
     sensor_msgs::msg::PointCloud2 cloud = mappoint_to_pointcloud(tracked_points, msg_time);
     tracked_mappoints_pub->publish(cloud);
 }
 
-void MonocularInertialSlamNode::publish_all_points(const std::vector<ORB_SLAM3::MapPoint *> all_points, const rclcpp::Time &msg_time)
+void MonocularInertialSlamNode::publish_all_points(const std::vector<ORB_SLAM3::MapPoint*>& all_points, const rclcpp::Time& msg_time)
 {
     sensor_msgs::msg::PointCloud2 cloud = mappoint_to_pointcloud(all_points, msg_time);
     all_mappoints_pub->publish(cloud);
