@@ -53,10 +53,9 @@ void MonocularInertialSlamNode::handle_imu(const ImuMsg::SharedPtr msg)
     Eigen::Vector3f gyr(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
 
     std::lock_guard<std::mutex> lock(imu_mutex_);
-    ORB_SLAM3::IMU::Point p;
-    p.t = t;
-    p.a = acc;
-    p.w = gyr;
+    const Eigen::Vector3f acc_c = acc;
+    const Eigen::Vector3f gyr_c = gyr;
+    ORB_SLAM3::IMU::Point p(t, acc_c, gyr_c);
     imu_buffer_.push_back(p);
 
     const double window_sec = 5.0; // keep up to 5 seconds IMU
