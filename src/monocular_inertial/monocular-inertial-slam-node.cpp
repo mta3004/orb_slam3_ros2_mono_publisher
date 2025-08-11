@@ -4,7 +4,6 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <sensor_msgs/image_encodings.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 MonocularInertialSlamNode::MonocularInertialSlamNode(ORB_SLAM3::System* slam_system)
@@ -64,13 +63,13 @@ void MonocularInertialSlamNode::handle_image(const ImageMsg::SharedPtr msg)
 {
     try
     {
-        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::BGR8);
+        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
         cv::Mat gray_image;
         cv::cvtColor(cv_ptr->image, gray_image, cv::COLOR_BGR2GRAY);
 
         const double t_frame = Utility::StampToSec(msg->header.stamp);
 
-        std::vector<IMU::Point> imu_measurements;
+        std::vector<ORB_SLAM3::IMU::Point> imu_measurements;
         {
             std::lock_guard<std::mutex> lock(imu_mutex_);
             size_t count = 0;

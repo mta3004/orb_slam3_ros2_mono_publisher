@@ -61,7 +61,7 @@ private:
     Sophus::SE3f current_camera_pose_;
 
     // IMU buffer (time-ordered)
-    std::deque<IMU::Point> imu_buffer_;
+    std::deque<ORB_SLAM3::IMU::Point> imu_buffer_;
     std::mutex imu_mutex_;
 
     void handle_image(const ImageMsg::SharedPtr msg);
