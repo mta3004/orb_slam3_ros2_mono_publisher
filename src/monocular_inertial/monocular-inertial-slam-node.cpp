@@ -1,10 +1,11 @@
 #include "monocular-inertial-slam-node.hpp"
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/eigen.hpp>
+#include <opencv2/imgproc.hpp>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <string>
 
 MonocularInertialSlamNode::MonocularInertialSlamNode(ORB_SLAM3::System* slam_system)
     : Node("ORB_SLAM3_ROS2_MI"), tf_broadcaster_(this)
@@ -52,7 +53,8 @@ void MonocularInertialSlamNode::handle_imu(const ImuMsg::SharedPtr msg)
     Eigen::Vector3f gyr(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
 
     std::lock_guard<std::mutex> lock(imu_mutex_);
-    imu_buffer_.emplace_back(t, acc, gyr);
+    ORB_SLAM3::IMU::Point p(acc, gyr, t);
+    imu_buffer_.push_back(p);
 
     const double window_sec = 5.0; // keep up to 5 seconds IMU
     while (!imu_buffer_.empty() && (imu_buffer_.back().t - imu_buffer_.front().t) > window_sec)
@@ -63,9 +65,26 @@ void MonocularInertialSlamNode::handle_image(const ImageMsg::SharedPtr msg)
 {
     try
     {
-        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
         cv::Mat gray_image;
-        cv::cvtColor(cv_ptr->image, gray_image, cv::COLOR_BGR2GRAY);
+        if (msg->encoding == "bgr8")
+        {
+            cv::Mat bgr(msg->height, msg->width, CV_8UC3, const_cast<unsigned char*>(msg->data.data()), msg->step);
+            cv::cvtColor(bgr, gray_image, cv::COLOR_BGR2GRAY);
+        }
+        else if (msg->encoding == "rgb8")
+        {
+            cv::Mat rgb(msg->height, msg->width, CV_8UC3, const_cast<unsigned char*>(msg->data.data()), msg->step);
+            cv::cvtColor(rgb, gray_image, cv::COLOR_RGB2GRAY);
+        }
+        else if (msg->encoding == "mono8")
+        {
+            gray_image = cv::Mat(msg->height, msg->width, CV_8UC1, const_cast<unsigned char*>(msg->data.data()), msg->step);
+        }
+        else
+        {
+            RCLCPP_ERROR_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "Unsupported image encoding: %s", msg->encoding.c_str());
+            return;
+        }
 
         const double t_frame = Utility::StampToSec(msg->header.stamp);
 

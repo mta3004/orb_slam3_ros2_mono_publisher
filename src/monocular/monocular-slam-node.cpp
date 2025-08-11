@@ -4,8 +4,7 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <sensor_msgs/image_encodings.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <opencv2/imgproc.hpp>
 #include "visualization_msgs/msg/marker.hpp"
 #include <nav_msgs/msg/odometry.hpp>
 
@@ -61,9 +60,26 @@ void MonocularSlamNode::GrabImage(const ImageMsg::SharedPtr msg)
 {
     try
     {
-        cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::BGR8);
         cv::Mat gray_image;
-        cv::cvtColor(cv_ptr->image, gray_image, cv::COLOR_BGR2GRAY);
+        if (msg->encoding == "bgr8")
+        {
+            cv::Mat bgr(msg->height, msg->width, CV_8UC3, const_cast<unsigned char*>(msg->data.data()), msg->step);
+            cv::cvtColor(bgr, gray_image, cv::COLOR_BGR2GRAY);
+        }
+        else if (msg->encoding == "rgb8")
+        {
+            cv::Mat rgb(msg->height, msg->width, CV_8UC3, const_cast<unsigned char*>(msg->data.data()), msg->step);
+            cv::cvtColor(rgb, gray_image, cv::COLOR_RGB2GRAY);
+        }
+        else if (msg->encoding == "mono8")
+        {
+            gray_image = cv::Mat(msg->height, msg->width, CV_8UC1, const_cast<unsigned char*>(msg->data.data()), msg->step);
+        }
+        else
+        {
+            RCLCPP_ERROR_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "Unsupported image encoding: %s", msg->encoding.c_str());
+            return;
+        }
 
         current_camera_pose = m_SLAM->TrackMonocular(gray_image, Utility::StampToSec(msg->header.stamp));
 

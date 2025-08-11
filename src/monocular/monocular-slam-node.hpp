@@ -6,7 +6,7 @@
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
-#include <cv_bridge/cv_bridge.h>
+#include <string>
 #include "System.h"
 #include "Frame.h"
 #include "Map.h"
@@ -46,7 +46,7 @@ private:
     
 
     ORB_SLAM3::System* m_SLAM;
-    cv_bridge::CvImagePtr m_cvImPtr;
+    // removed cv_bridge usage; convert images manually
 
     rclcpp::Subscription<ImageMsg>::SharedPtr m_image_subscriber;
 

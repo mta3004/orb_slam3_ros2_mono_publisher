@@ -12,7 +12,7 @@
 #include "Map.h"
 #include "Tracking.h"
 #include "Atlas.h"
-#include "ImuTypes.h"
+#include "ImuTypes.h"  // defines ORB_SLAM3::IMU::Point with ctor (acc, gyro, t)
 #include "std_msgs/msg/header.hpp"
 #include "utility.hpp"
 #include <tf2/LinearMath/Transform.h>
